@@ -3,7 +3,7 @@
 A barebones project to play around with making a plugin system and isolating each plugins resources.
 
 * Run `./gradlew buildAndRun` to build and run the application.
-This task will move generated plugin jar files to `build/libs` between the build and run steps.
+This task will copy generated plugin jar files to `build/libs` between the build and run steps.
 
 
 This project follows the suggested multi-module setup and consists of the `app`, `plugin_stdlib`, `module1` and `module2` subprojects.
