@@ -3,8 +3,6 @@
 package buildsrc.convention
 
 import org.gradle.api.tasks.testing.logging.TestLogEvent
-import org.gradle.kotlin.dsl.`java-library`
-import org.gradle.kotlin.dsl.support.serviceOf
 
 plugins {
     // Apply the Kotlin JVM plugin to add support for Kotlin in JVM projects.
@@ -14,13 +12,22 @@ plugins {
 
 kotlin {
     // Use a specific Java version to make it easier to work in different environments.
-    jvmToolchain(22)
+    jvmToolchain(20)
 }
 
 tasks.jar {
     manifest {
-        attributes("Automatic-Module-Name" to "dev.akerstrom.${project.name}")
+//        attributes("Automatic-Module-Name" to "dev.akerstrom.${project.name}")
     }
+}
+
+tasks.named("compileJava", JavaCompile::class.java) {
+    val moduleName = "dev.akerstrom.${project.name}"
+    val moduleLoc = sourceSets["main"].output.asPath
+    options.compilerArgumentProviders.add(CommandLineArgumentProvider {
+        // Provide compiled Kotlin classes to javac – needed for Java/Kotlin mixed sources to work
+        listOf("--patch-module", "${moduleName}=${moduleLoc}")
+    })
 }
 
 tasks.withType<Test>().configureEach {

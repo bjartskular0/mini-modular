@@ -22,9 +22,9 @@ rootProject.name = "mini-modular"
 // If there are changes in only one of the projects, Gradle will rebuild only the one that has changed.
 // Learn more about structuring projects with Gradle - https://docs.gradle.org/8.7/userguide/multi_project_builds.html
 include(":app")
+//include(":autodeps")
 include(":plugin_stdlib")
-include(":module1")
-include(":module2")
-//include(":module3")
-//include(":module4")
-
+include(":plugin_one")
+include(":plugin_two")
+//include(":plugin_three")
+//include(":plugin_four")

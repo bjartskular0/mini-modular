@@ -6,10 +6,11 @@ plugins {
 }
 
 kotlin {
-    jvmToolchain(22)
+    jvmToolchain(20)
 }
 
 dependencies {
     // Add a dependency on the Kotlin Gradle plugin, so that convention plugins can apply it.
     implementation(libs.kotlinGradlePlugin)
+    implementation(libs.extraJavaModuleInfoPlugin)
 }

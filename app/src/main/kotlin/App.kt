@@ -1,31 +1,60 @@
 package dev.akerstrom.app
 
-import dev.akerstrom.plugins.ModuleService
-import java.net.URLClassLoader
-import java.util.ServiceLoader
+import dev.akerstrom.plugins.PluginService
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+import java.lang.module.ModuleFinder
+import java.util.*
 import kotlin.io.path.Path
-import kotlin.io.path.listDirectoryEntries
 
+object App {
+    @JvmStatic
+    fun main(args: Array<String>): Unit = io.ktor.server.cio.EngineMain.main(args)
+}
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-fun main() {
+fun Application.module() {
+    // Read config
     val config = AppConfig.loadConfig()
 
-    val modulesPath = Path(config.modulesDir).toAbsolutePath().normalize()
-    val modulePaths = modulesPath.listDirectoryEntries("*.jar")
-    val moduleURLs = modulePaths.map { p ->
-        p.toUri().toURL()
-    }.toTypedArray()
+    // Get a path to the plugins directory
+    val pluginsPath = Path(config.pluginsDir).toAbsolutePath().normalize()
 
-    val loader = URLClassLoader(moduleURLs)
-    val serviceLoader = ServiceLoader.load<ModuleService>(ModuleService::class.java, loader)
+    // We're using the Java 9+ JPM system to load the plugins. Each plugin is a module.
+    val finder = ModuleFinder.of(pluginsPath)
+    val parent = ModuleLayer.boot()
+    // `resolveAndBind` is required for service discovery
+    val cf = parent.configuration().resolveAndBind(finder, ModuleFinder.of(), emptySet())
+    val scl = ClassLoader.getSystemClassLoader()
+    // We use ManyLoaders to allow multiple plugins with overlapping packages and resources.
+    val layer = parent.defineModulesWithManyLoaders(cf, scl)
 
-    serviceLoader.forEach { s ->
-        try {
-            println("${s.getName()}, ${s.getOrigin()}")
-        } catch (e: Exception) {
-            println(e)
+    // Load the plugins
+    val serviceLoader = ServiceLoader.load(layer, PluginService::class.java)
+
+    // Ktor Setup
+    install(IgnoreTrailingSlash)
+
+    // Initialize the plugins
+    routing {
+        get("/") {
+            call.respondText { "App Landing Page" }
+        }
+        route("/plugins") {
+            get("/") {
+                call.respondText(contentType = ContentType.Text.Html) {
+                    "Plugins:<ul>${
+                        serviceLoader.joinToString(separator = "") { s ->
+                            "<a href=${call.request.uri.removeSuffix("/")}/${s.getHostname()}/><li>${s.getName()}</li></a>"
+                        }
+                    }</ul>"
+                }
+            }
+            serviceLoader.forEach { s ->
+                s.routes()()
+            }
         }
     }
 }

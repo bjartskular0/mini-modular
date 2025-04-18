@@ -6,7 +6,7 @@ import kotlinx.serialization.decodeFromString
 
 @Serializable
 data class AppConfig(
-    val modulesDir: String
+    val pluginsDir: String
 ) {
     companion object {
         fun loadConfig(): AppConfig {

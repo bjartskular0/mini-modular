@@ -2,7 +2,6 @@
 // `buildSrc` is a Gradle-recognized directory and every plugin there will be easily available in the rest of the build.
 package buildsrc.convention
 
-import gradle.kotlin.dsl.accessors._d9dcfd1a467b0b6fe90c5571a57aa558.jar
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
@@ -12,13 +11,18 @@ plugins {
 
 kotlin {
     // Use a specific Java version to make it easier to work in different environments.
-    jvmToolchain(22)
+    jvmToolchain(20)
 }
 
-tasks.jar {
-    manifest {
-        attributes("Automatic-Module-Name" to "dev.akerstrom.${project.name}")
-    }
+tasks.named("compileJava", JavaCompile::class.java) {
+    val moduleName = "dev.akerstrom.${project.name}"
+
+    val moduleLoc = sourceSets["main"].output.asPath
+    println("${moduleName}=${moduleLoc}")
+    options.compilerArgumentProviders.add(CommandLineArgumentProvider {
+        // Provide compiled Kotlin classes to javac – needed for Java/Kotlin mixed sources to work
+        listOf("--patch-module", "${moduleName}=${moduleLoc}")
+    })
 }
 
 tasks.withType<Test>().configureEach {
