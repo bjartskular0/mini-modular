@@ -1,4 +1,4 @@
-import dev.akerstrom.plugins.impl.PluginOne;
+import dev.akerstrom.plugins.impl.PluginImpl;
 
 // LEAVE OPEN! Must be open to allow proper resource finding.
 open module dev.akerstrom.plugin_one {
@@ -7,5 +7,5 @@ open module dev.akerstrom.plugin_one {
     requires io.ktor.server.core;
     requires dev.akerstrom.plugin_stdlib;
 
-    provides dev.akerstrom.plugins.PluginService with PluginOne;
+    provides dev.akerstrom.plugins.PluginService with PluginImpl;
 }

@@ -15,7 +15,9 @@ module dev.akerstrom.app {
 //    requires jdk.unsupported;
 
     requires dev.akerstrom.plugin_stdlib;
+    requires io.ktor.utils;
 
-    exports dev.akerstrom.app;
     uses dev.akerstrom.plugins.PluginService;
+
+    exports dev.akerstrom.app to kotlin.reflect;
 }

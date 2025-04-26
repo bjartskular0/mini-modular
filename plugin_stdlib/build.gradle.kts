@@ -13,6 +13,7 @@ dependencies {
     api(libs.bundles.ktorEcosystem)
     api(libs.bundles.ktomlEcosystem)
     api(libs.logback.classic)
+    api(libs.kotlin.logging)
 //    api(project(":autodeps"))
     testImplementation(kotlin("test"))
 }
